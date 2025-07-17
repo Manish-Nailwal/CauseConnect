@@ -59,7 +59,7 @@ const RaiserDashboard = () => {
             params: { id: user._id, fund: "campaigns" },
           })
           .then((res) => {
-            setUserTransactions(res.data.recieveTransactions);
+            setUserTransactions(res.data.recieveTransactions.slice().reverse());
           });
       }
     };
@@ -290,7 +290,7 @@ const RaiserDashboard = () => {
               </div>
 
               <div className="space-y-4">
-                {userTransactions.slice(0, 5).reverse().map((transaction, idx) => (
+                {userTransactions.slice(0, 5).map((transaction, idx) => (
                   <div
                     key={idx}
                     className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-dark-700 rounded-lg border dark:border-dark-900"
