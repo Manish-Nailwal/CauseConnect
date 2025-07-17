@@ -62,12 +62,26 @@ npm install
 
 ### 4. Set up environment variables
 
-#### Create a .env file in the server/ directory:
+#### Create a .env file in the backend/ directory:
 
 ```
-MONGO_URI=your-mongodb-uri
-JWT_SECRET=your-secret-key
-PORT=5000
+FRONTEND_URL="http://localhost:5173"
+MONGO_URL="db url"
+SECRET="any secret text"
+TOKEN_KEY="jwt verify token key"
+PORT="4000"
+
+
+
+# cloud
+CLOUD_NAME="cloud name"
+API_KEY="cloud api"
+API_SECRET="cloud api secret"
+
+```
+#### Create a .env file in the backend/ directory:
+```
+VITE_BACK_END="http://localhost:4000"  #port should be same as backend, 4000 in this case
 ```
 
 ### 5. Run the app locally
