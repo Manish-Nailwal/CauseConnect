@@ -37,4 +37,5 @@ app.use("/", fundRoute);
 app.listen(PORT, () => {
   console.log("listening at port: " + PORT);
   console.log("http://localhost:" + PORT);
+  console.log(process.env.FRONTEND_URL);
 });
