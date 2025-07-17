@@ -79,7 +79,7 @@ API_KEY="cloud api"
 API_SECRET="cloud api secret"
 
 ```
-#### Create a .env file in the backend/ directory:
+#### Create a .env file in the frontend/ directory:
 ```
 VITE_BACK_END="http://localhost:4000"  #port should be same as backend, 4000 in this case
 ```
