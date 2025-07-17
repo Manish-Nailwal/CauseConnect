@@ -37,7 +37,7 @@ export const AllFunds = async (req, res) => {
     for (let fund of allFunds) {
       fund.checkStatus();
     }
-    const funds = await Fund.find({});
+    const funds = await Fund.find({}).populate("organizer");
     return res.json(funds);
   } catch (err) {
     console.error(err);

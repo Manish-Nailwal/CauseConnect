@@ -72,7 +72,7 @@ const ReceivedDonations = () => {
       filterFund === "all" || transaction.fund._id === filterFund;
     return matchesSearch && matchesFund;
   });
-  const uniqueDonors = new Set(filteredTransactions.map((t) => t.donor._Id))
+  const uniqueDonors = new Set(filteredTransactions.map((t) => t.donor._id))
     .size;
 
   return (
@@ -161,7 +161,7 @@ const ReceivedDonations = () => {
 
         {/* Filters and Search */}
         <div className="bg-white rounded-2xl shadow-md p-6 mb-8 border border-gray-100 dark:bg-dark-800 dark:border-dark-600">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-200 h-4 w-4" />
@@ -174,7 +174,7 @@ const ReceivedDonations = () => {
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 mt-1">
                 <Filter className="h-4 w-4 text-gray-400 dark:text-dark-400" />
                 <select
                   value={filterFund}
@@ -191,7 +191,7 @@ const ReceivedDonations = () => {
               </div>
             </div>
 
-            <button className="flex items-center space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+            <button className="flex items-center mt-1 space-x-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
               <Download className="h-4 w-4" />
               <span>Export</span>
             </button>

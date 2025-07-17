@@ -1,19 +1,29 @@
 import { useContext, useEffect, useState } from "react";
-import { Edit, MapPin, Calendar, Heart, Award, TrendingUp, BarChart3 } from "lucide-react";
+import {
+  Edit,
+  MapPin,
+  Calendar,
+  Heart,
+  Award,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import { TfiLayoutLineSolid } from "react-icons/tfi";
 import axios from "axios";
 import { backendDomain } from "../App";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FundContext } from "../context/FundContext";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 const Profile = () => {
+  const navigate = useNavigate()
   const [achieve, setAchieve] = useState(false); // Achievements Status
   const { user } = useContext(AuthContext);
   const [userFunds, setUserFunds] = useState([]);
   const [supportedFunds, setSupportedFunds] = useState([]); // User's supported campaigns
   const [favFund, setFavFund] = useState([]);
-  const { funds } = useContext(FundContext)
+  const { funds } = useContext(FundContext);
 
   if (!user) {
     return <div>Loading...</div>;
@@ -26,6 +36,7 @@ const Profile = () => {
           params: { id: user._id, fund },
         })
         .then((res) => {
+          console.log(res.data);
           setUserFunds(res.data);
         });
       await axios
@@ -42,8 +53,13 @@ const Profile = () => {
   }, []);
 
   useEffect(() => {
-    setSupportedFunds(userFunds.slice(0, 3));
-  }, [userFunds]);
+    if (!user) return;
+    if (user.role == "donator") {
+      setSupportedFunds(favFund.slice().reverse());
+    } else {
+      setSupportedFunds(userFunds.slice().reverse());
+    }
+  }, [favFund, userFunds]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-linear-to-br dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 py-8">
@@ -130,7 +146,7 @@ const Profile = () => {
                   <>
                     <div className="text-center p-4 bg-emerald-50 rounded-xl border border-green-100 dark:bg-dark-700 dark:border-dark-600">
                       <div className="text-3xl font-bold text-green-600 mb-2">
-                        ₹‎{user.totalRaised?.toLocaleString() || 0}
+                        ₹{user.totalRaised?.toLocaleString() || 0}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-dark-200">
                         Total Raised
@@ -162,11 +178,11 @@ const Profile = () => {
               <div className="sticky top-0 z-10 bg-white dark:bg-dark-800 pb-0.5">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-200 mb-6">
                   {user.role === "donator"
-                    ? "Your Supported Campaigns"
+                    ? "Your Favorite Campaigns"
                     : "Your Campaigns"}
                 </h2>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-56 overflow-y-auto">
                 {supportedFunds.length > 0 ? (
                   supportedFunds.map((fund, idx) => (
                     <div
@@ -208,11 +224,11 @@ const Profile = () => {
                       <div className="text-right">
                         <div className="text-lg font-semibold text-emerald-600">
                           {user.role === "donator"
-                            ? "₹250"
+                            ? (<button onClick={()=>{navigate(`/fund/${fund._id}`)}}><FaExternalLinkAlt/></button>)
                             : `₹${fund.currentAmount.toLocaleString()}`}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-dark-400">
-                          {user.role === "donator" ? "Your donation" : "Raised"}
+                          {user.role === "donator" ? "" : "Raised"}
                         </div>
                       </div>
                     </div>
@@ -225,13 +241,19 @@ const Profile = () => {
                         No campaigns yet
                       </h3>
                       <p className="text-gray-500 dark:text-dark-400 mb-4">
-                        {user.role=="donator" ? "Support a cause—make your first donation today.":"Create your first campaign to start raising funds"}
+                        {user.role == "donator"
+                          ? "No favorites yet—start tracking the causes you care about."
+                          : "Create your first campaign to start raising funds"}
                       </p>
                       <Link
-                        to={user.role=='donator'?"/funds":"/raiser/create"}
+                        to={
+                          user.role == "donator" ? "/funds" : "/raiser/create"
+                        }
                         className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
                       >
-                        {user.role=='donator'?"Find Causes":"Create Campaign"}
+                        {user.role == "donator"
+                          ? "Find Causes"
+                          : "Create Campaign"}
                       </Link>
                     </div>
                   </>
@@ -369,9 +391,10 @@ const Profile = () => {
                   : "Trending Campaigns"}
               </h3>
               <div className="space-y-4">
-                {funds.slice(2,4).map((fund, idx) => (
+                {funds.slice(2, 4).map((fund, idx) => (
                   <div
                     key={idx}
+                    onClick={()=>{navigate(`/fund/${fund._id}`)}}
                     className="border border-gray-200 dark:border-dark-600 rounded-xl p-3 hover:border-emerald-300 transition-colors"
                   >
                     <img

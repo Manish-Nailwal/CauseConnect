@@ -2,10 +2,6 @@ import React, { useState, useMemo, useContext } from "react";
 import { Search } from "lucide-react";
 import FundCard from "../components/FundCard";
 import FilterBar from "../components/FilterBar";
-import { mockFunds } from "../data/mockData";
-import axios from "axios";
-import { useEffect } from "react";
-import { backendDomain } from "../App";
 import { FundContext } from "../context/FundContext";
 const AllFunds = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");

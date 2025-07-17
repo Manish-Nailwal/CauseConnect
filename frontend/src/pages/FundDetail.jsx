@@ -29,21 +29,16 @@ import { FundContext } from "../context/FundContext";
 const FundDetail = () => {
   const { id } = useParams();
   const {funds} = useContext(FundContext);
-  const [fund, setFund] = useState(mockFunds.find((f) => f._id === id));
+  const [fund, setFund] = useState();
   const { user, verifyUser } = useContext(AuthContext);
   useEffect(() => {
-    const updateFund = async () => {
-      await axios.get(`${backendDomain}/campaignInfo/${id}`).then((res) => {
-        setFund(res.data);
-      });
-    };
-    updateFund();
+    setFund(funds.find((f) => f._id === id));
   }, [funds]);
   useEffect(() => {
     if (user && user.favorites.some((favId) => favId.toString() === id)) {
       setUserFav(true);
     }
-  }, [user,]);
+  }, [user]);
 
   const [userFav, setUserFav] = useState(false);
   const [preview, setPreview] = useState("");

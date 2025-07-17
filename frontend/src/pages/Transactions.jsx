@@ -133,7 +133,7 @@ const Transactions = () => {
                     : "Total Received"}
                 </p>
                 <p className="text-2xl font-semibold text-gray-900 dark:text-dark-200">
-                  ${totalAmount.toLocaleString()}
+                  ₹{totalAmount.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -297,7 +297,7 @@ const Transactions = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-dark-400">
-                          ${transaction.amount.toLocaleString()}
+                          ₹{transaction.amount.toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span

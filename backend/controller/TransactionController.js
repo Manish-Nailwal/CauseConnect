@@ -34,6 +34,7 @@ export const newTransaction = async (req, res) => {
     fund.donors.push(donor._id);
     donor.transaction.push(transaction._id);
     donor.totalDonated += tData.amount;
+    donor.supported.push(fund._id);
     organizer.totalRaised += tData.amount;
     organizer.transaction.push(transaction._id);
 
