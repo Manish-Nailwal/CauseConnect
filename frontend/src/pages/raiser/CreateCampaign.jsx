@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import { FundContext } from "../../context/FundContext";
 
 const CreateCampaign = () => {
-  const { user } = useContext(AuthContext);
+  const { user, verifyUser } = useContext(AuthContext);
   const { updateFunds } = useContext(FundContext);
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -114,7 +114,6 @@ const CreateCampaign = () => {
 
   const updateImage = (e) => {
     const file = e.target.files[0];
-    console.log(file);
     if (file && file.size <= 5 * 1024 * 1024) {
       const previewUrl = URL.createObjectURL(file);
       setPreview(previewUrl);
@@ -149,8 +148,14 @@ const CreateCampaign = () => {
       delete dataToSend.imageUrl;
       formData.append("data", JSON.stringify(dataToSend));
 
-      await axios.post(`${backendDomain}/create/${user._id}`, formData);
-      updateFunds();
+      await axios
+        .post(`${backendDomain}/create/${user._id}`, formData)
+        .then((res) => {
+          if (res.data.success) {
+            verifyUser();
+            updateFunds();
+          }
+        });
     } catch (err) {
       toast.error(err.message);
     }

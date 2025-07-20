@@ -160,6 +160,11 @@ const Navbar = () => {
                         >
                           <item.icon className="mr-3 h-4 w-4 text-gray-400 dark:text-dark-500 group-hover:text-emerald-500" />
                           {item.name}
+                          {item.name === "Notifications" &&
+                            user.notifications.filter((n) => !n.read).length >
+                              0 && (
+                              <span className="ml-2 w-2 h-2 bg-emerald-600 dark:bg-green-600 rounded-full inline-block"></span>
+                            )}
                         </Link>
                       ))}
                       <div className="border-t border-gray-100 dark:border-dark-700 mt-2">
@@ -288,6 +293,11 @@ const Navbar = () => {
                       >
                         <item.icon className="mr-3 h-5 w-5 text-gray-400 dark:text-dark-500" />
                         {item.name}
+                        {item.name === "Notifications" &&
+                          user.notifications.filter((n) => !n.read).length >
+                            0 && (
+                            <span className="ml-2 w-2 h-2 bg-emerald-600 dark:bg-green-600 rounded-full inline-block"></span>
+                          )}
                       </Link>
                     ))}
                     <button

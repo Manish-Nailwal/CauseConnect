@@ -55,7 +55,6 @@ const FundDetail = () => {
         .patch(`${backendDomain}/addFav`, { userId: user._id, campaignId: id })
         .then((res) => {
           if (res.data.success) {
-            toast.success("Added");
             setUserFav(true);
             verifyUser();
           } else {
@@ -72,7 +71,6 @@ const FundDetail = () => {
       })
       .then((res) => {
         if (res.data.success) {
-          toast.success("Removed");
           setUserFav(false);
           verifyUser();
         } else {

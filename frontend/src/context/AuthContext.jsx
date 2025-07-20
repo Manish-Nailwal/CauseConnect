@@ -42,7 +42,6 @@ function AuthProvider(props) {
 
   const login = async (userData) => {
     return new Promise((resolve, reject) => {
-      console.log("try");
       axios
         .post(`${backendDomain}/login`, userData)
         .then((res) => {

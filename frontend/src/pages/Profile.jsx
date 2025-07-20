@@ -36,7 +36,6 @@ const Profile = () => {
           params: { id: user._id, fund },
         })
         .then((res) => {
-          console.log(res.data);
           setUserFunds(res.data);
         });
       await axios

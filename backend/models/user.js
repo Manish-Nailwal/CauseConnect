@@ -1,17 +1,25 @@
-import mongoose from "mongoose";
+import mongoose, { SchemaType } from "mongoose";
 const Schema = mongoose.Schema;
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
+const notificationSchema = new Schema({
+  type: {type: String},
+  title: {type: String},
+  message: {type: String},
+  time: {type: String, default: Date.now},
+  read: {type: Boolean, default: false},
+  icon: {type: String, default: "Bell"},
+  color: {type: String, default: "from-orange-500 to-red-600"},
+  actionUrl: {type: String, default: "/raiser/campaigns"},
+});
 
 const userSchema = new Schema({
   name: {
     type: String,
     required: [true, "Your Name is required"],
   },
-  totalDonated: {type: Number, default: 0},
-  totalRaised: {type: Number, default: 0},
   email: {
     type: String,
     required: [true, "Your mail-id is required"],
@@ -56,6 +64,7 @@ const userSchema = new Schema({
       ref: "Fund",
     },
   ],
+  notifications: [notificationSchema],
   totalDonated: { type: Number, default: 0 },
   totalRaised: { type: Number, default: 0 },
 });

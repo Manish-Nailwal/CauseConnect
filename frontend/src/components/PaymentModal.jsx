@@ -14,7 +14,7 @@ import { FundContext } from "../context/FundContext";
 
 const PaymentModal = ({ isOpen, onClose, fund }) => {
   const {updateFunds} = useContext(FundContext);
-  const { user } = useContext(AuthContext);
+  const { user, verifyUser } = useContext(AuthContext);
   const [step, setStep] = useState(1); // 1: Amount, 2: Payment Details, 3: Processing, 4: Success
   const [paymentData, setPaymentData] = useState({
     amount: "",
@@ -105,6 +105,7 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
             toast.error(res.data.message);
             return;
           }
+          verifyUser();
         });
 
         updateFunds();

@@ -9,6 +9,7 @@ import {
   Mail,
   Eye,
   IndianRupee,
+  Check,
 } from "lucide-react";
 import { AuthContext } from "../../context/AuthContext";
 import axios from "axios";
@@ -17,7 +18,7 @@ import { toast } from "react-toastify";
 import { TfiLayoutLineSolid } from "react-icons/tfi";
 
 const ReceivedDonations = () => {
-  const { user } = useContext(AuthContext);
+  const { user, verifyUser } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFund, setFilterFund] = useState("all");
   const [selectedDonation, setSelectedDonation] = useState(null);
@@ -50,7 +51,7 @@ const ReceivedDonations = () => {
     };
     updateTransactions();
     updateFund();
-  }, []);
+  }, [user]);
 
   // const uniqueDonors = {};
   useEffect(() => {
@@ -74,6 +75,21 @@ const ReceivedDonations = () => {
   });
   const uniqueDonors = new Set(filteredTransactions.map((t) => t.donor._id))
     .size;
+
+  const handleThanks = async () => {
+    await axios
+      .patch(`${backendDomain}/thank`, {
+        tId: selectedDonation._id,
+        oId: user._id,
+      })
+      .then((res) => {
+        if (res.data.success) {
+          const updatedTxn = { ...selectedDonation, thanked: true };
+          setSelectedDonation(updatedTxn);
+          verifyUser();
+        }
+      });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-linear-to-br dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 py-8">
@@ -280,7 +296,9 @@ const ReceivedDonations = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
-                            onClick={() => setSelectedDonation(transaction)}
+                            onClick={() => {
+                              setSelectedDonation(transaction);
+                            }}
                             className="text-emerald-600 hover:text-emerald-900 dark:hover:text-green-400 flex items-center"
                           >
                             <Eye className="h-4 w-4 mr-1" />
@@ -310,7 +328,7 @@ const ReceivedDonations = () => {
 
         {/* Donation Detail Modal */}
         {selectedDonation && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 dark:border-dark-600">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 dark:border-dark-600">
             <div className="bg-white dark:bg-dark-800 rounded-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-dark-200">
@@ -396,14 +414,26 @@ const ReceivedDonations = () => {
                 >
                   Close
                 </button>
-                <button
-                  onClick={() => {
-                    toast.info("Sent!");
-                  }}
-                  className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors"
-                >
-                  Send Thank You
-                </button>
+                {!selectedDonation.thanked ? (
+                  <button
+                    onClick={async () => {
+                      handleThanks(selectedDonation);
+                    }}
+                    className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors"
+                  >
+                    Send Thank You
+                  </button>
+                ) : (
+                  <button
+                    onClick={async () => {}}
+                    className="flex-1 flex flex-row items-center justify-center border border-dark-600 cursor-not-allowed text-white py-2 px-4 rounded-lg "
+                  >
+                    Thanks delivered.
+                    <div className=" ml-2 p-1 text-emerald-600 ] bg-emerald-100 dark:bg-dark-700 rounded-lg transition-colors">
+                      <Check className="h-4 w-4" />
+                    </div>
+                  </button>
+                )}
               </div>
             </div>
           </div>

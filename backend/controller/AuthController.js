@@ -30,6 +30,17 @@ export const Signup = async (req, res, next) => {
         joinDate,
       });
     }
+    const notify = {
+      type: "system",
+      title: "Account Successfully Created",
+      message:
+        "Welcome aboard! Your account has been created successfully. We're excited to have you with us!",
+      icon: "UserPlus",
+      color: "from-green-500 to-emerald-600",
+      actionUrl: "/profile",
+    };
+    user.notifications.push(notify);
+    await user.save();
     const token = await user.generateToken();
     res.status(201).json({
       message: "User signed in successfully",
@@ -59,6 +70,17 @@ export const Login = async (req, res, next) => {
       return res.json({ message: "Incorrect password or email" });
     }
     const token = await user.generateToken();
+    const notify = {
+      type: "system",
+      title: "New Device Login Detected",
+      message:
+        "Your account was just accessed from a new device. If this was not you, please secure your account immediately.",
+      icon: "ShieldCheck",
+      color: "from-yellow-500 to-orange-600",
+      actionUrl: "/settings", 
+    };
+    user.notifications.push(notify);
+    await user.save();
     res.status(200).json({
       message: "User logged in successfully",
       success: true,

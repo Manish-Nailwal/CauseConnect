@@ -16,11 +16,20 @@ export const CreateFund = async (req, res) => {
     newCampaign.organizer = organizer;
     newCampaign.currentAmount = 0;
     const campaign = await newCampaign.save();
-
     const user = await User.findById(organizer);
     user.campaigns.push(campaign);
+    const notify = {
+      type: "campaign",
+      title: "Your Campaign Is Live!",
+      message:
+        "Congratulations! Your new campaign is now live and ready to receive support. Let’s make an impact together!",
+      icon: "Megaphone", 
+      color: "from-indigo-500 to-purple-600",
+      actionUrl: `/campaigns/${campaign._id}`,
+    };
+    user.notifications.push(notify);
     await user.save();
-    res.status(201).json({ data: campaign });
+    res.status(201).json({ success: true,data: campaign });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Campaign wasn't created." });
@@ -31,7 +40,7 @@ export const AllFunds = async (req, res) => {
   try {
     await autoExpireFunds();
     const allFunds = await Fund.find({});
-    if(allFunds.length==0){
+    if (allFunds.length == 0) {
       return res.json(allFunds);
     }
     for (let fund of allFunds) {
