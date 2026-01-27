@@ -33,6 +33,30 @@ app.use("/", authRoute);
 app.use("/", transactionRoute);
 app.use("/", fundRoute);
 
+// Route that will be used for self-ping
+app.get("/api/keep-alive", (req, res) => {
+  console.log("🔁 Self-ping received at", new Date().toLocaleTimeString());
+  res.status(200).send("pong");
+});
+
+/* ------------------ SELF PING LOGIC ------------------ */
+
+const SELF_URL =
+  process.env.SELF_URL || `http://localhost:${PORT}`;
+
+// Ping every 10 minutes (safe value)
+const INTERVAL = 10 * 60 * 1000;
+
+setInterval(async () => {
+  try {
+    const res = await fetch(`${SELF_URL}/api/keep-alive`);
+    console.log("✅ Self-ping status:", res.status);
+  } catch (error) {
+    console.error("❌ Self-ping failed:", error.message);
+  }
+}, INTERVAL);
+
+
 // Start the server
 app.listen(PORT, () => {
   console.log("listening at port: " + PORT);
