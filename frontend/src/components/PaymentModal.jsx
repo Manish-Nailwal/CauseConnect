@@ -11,9 +11,10 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { backendDomain } from "../App";
 import { FundContext } from "../context/FundContext";
+import DonationAmountStep from "./DonationAmountStep";
 
 const PaymentModal = ({ isOpen, onClose, fund }) => {
-  const {updateFunds} = useContext(FundContext);
+  const { updateFunds } = useContext(FundContext);
   const { user, verifyUser } = useContext(AuthContext);
   const [step, setStep] = useState(1); // 1: Amount, 2: Payment Details, 3: Processing, 4: Success
   const [paymentData, setPaymentData] = useState({
@@ -30,8 +31,8 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
   const [error, setError] = useState("");
 
   const handleInputChange = (field, value) => {
-    if(field=="amount" && value>10000){
-      value = 10000
+    if (field == "amount" && value > 10000) {
+      value = 10000;
     }
     setPaymentData((prev) => ({
       ...prev,
@@ -80,8 +81,13 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
   const processPayment = async () => {
     setIsProcessing(true);
     setStep(3);
-    if(fund.targetAmount-fund.currentAmount < parseFloat(paymentData.amount)){
-      setError(`Payment failed. Donation amount exceeds the remaining goal of ₹${fund.targetAmount - fund.currentAmount}.`);
+    if (
+      fund.targetAmount - fund.currentAmount <
+      parseFloat(paymentData.amount)
+    ) {
+      setError(
+        `Payment failed. Donation amount exceeds the remaining goal of ₹${fund.targetAmount - fund.currentAmount}.`,
+      );
       setStep(2);
     }
 
@@ -101,14 +107,14 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
       await axios
         .post(`${backendDomain}/transactions`, transaction)
         .then((res) => {
-          if(!res.data.success){
+          if (!res.data.success) {
             toast.error(res.data.message);
             return;
           }
           verifyUser();
         });
 
-        updateFunds();
+      updateFunds();
       // Simulate DevezPay API call
       await new Promise((resolve) => setTimeout(resolve, 3000));
       setStep(4);
@@ -134,20 +140,20 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
     }
   };
 
-  const handleClose = ()=>{
+  const handleClose = () => {
     setPaymentData({
-        amount: "",
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
-        cardholderName: "",
-        email: user?.email || "",
-        phone: user?.phone || "",
-        anonymous: false,
-      });
-      setStep(1);
-      onClose();
-  }
+      amount: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      anonymous: false,
+    });
+    setStep(1);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -191,68 +197,18 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
 
         {/* Step 1: Amount */}
         {step === 1 && (
-          <div className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
-                Donation Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-dark-400">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="5"
-                  max="10000"
-                  value={paymentData.amount}
-                  onChange={(e) => handleInputChange("amount", e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                  placeholder="0.00"
-                />
-              </div>
-              <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
-                Minimum ₹5 Maximum ₹10,000
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              {[250, 500, 1000].map((amount) => (
-                <button
-                  key={amount}
-                  onClick={() => handleInputChange("amount", amount.toString())}
-                  className="py-2 px-4 border border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
-                >
-                  ₹{amount}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="anonymous"
-                checked={paymentData.anonymous}
-                onChange={(e) =>
-                  handleInputChange("anonymous", e.target.checked)
-                }
-                className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              <label
-                htmlFor="anonymous"
-                className="text-sm text-gray-700 dark:text-dark-300"
-              >
-                Make this donation anonymous
-              </label>
-            </div>
-
-            <button
-              onClick={nextStep}
-              disabled={!validateStep1()}
-              className="w-full bg-linear-to-r from-emerald-500 to-green-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-emerald-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Continue to Payment
-            </button>
-          </div>
+          <DonationAmountStep
+            amount={paymentData.amount}
+            anonymous={paymentData.anonymous}
+            onAmountChange={(value) => {
+              if (value > 10000) value = 10000;
+              setPaymentData((prev) => ({ ...prev, amount: value }));
+            }}
+            onAnonymousChange={(checked) =>
+              setPaymentData((prev) => ({ ...prev, anonymous: checked }))
+            }
+            onContinue={() => setStep(2)}
+          />
         )}
 
         {/* Step 2: Payment Details */}
@@ -275,7 +231,7 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
                 onChange={(e) =>
                   handleInputChange(
                     "cardNumber",
-                    formatCardNumber(e.target.value)
+                    formatCardNumber(e.target.value),
                   )
                 }
                 className="w-full px-4 py-3 border border-gray-300 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
@@ -295,7 +251,7 @@ const PaymentModal = ({ isOpen, onClose, fund }) => {
                   onChange={(e) =>
                     handleInputChange(
                       "expiryDate",
-                      formatExpiryDate(e.target.value)
+                      formatExpiryDate(e.target.value),
                     )
                   }
                   className="w-full px-4 py-3 border border-gray-300 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"

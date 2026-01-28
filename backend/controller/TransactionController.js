@@ -30,14 +30,20 @@ export const newTransaction = async (req, res) => {
     transaction.fund = fund._id;
     transaction.donor = donor._id;
     transaction.organizer = organizer._id;
-    fund.currentAmount += tData.amount;
+
     fund.donors.push(donor._id);
     donor.transaction.push(transaction._id);
-    donor.totalDonated += tData.amount;
     donor.supported.push(fund._id);
-    organizer.totalRaised += tData.amount;
+    if (typeof tData.amount == "string") {
+      fund.currentAmount += parseInt(tData.amount);
+      donor.totalDonated += parseInt(tData.amount);
+      organizer.totalRaised += parseInt(tData.amount);
+    } else {
+      fund.currentAmount += tData.amount;
+      donor.totalDonated += tData.amount;
+      organizer.totalRaised += tData.amount;
+    }
     organizer.transaction.push(transaction._id);
-
     await transaction.save();
     await fund.save();
     const dNotify = {
@@ -137,7 +143,7 @@ export const sentThank = async (req, res) => {
     await donor.save();
     await organizer.save();
     await txn.save();
-    return res.json({success: true});
+    return res.json({ success: true });
   } catch (err) {
     console.error("Transaction Info Error:", err);
     return res.status(500).json({

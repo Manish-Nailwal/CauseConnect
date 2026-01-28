@@ -9,15 +9,17 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoute from "./routes/userRoute.js";
 import transactionRoute from "./routes/transactionRoute.js";
+import paymentRoute from "./routes/paymentRoute.js";
 import fundRoute from "./routes/fundRoute.js";
 
 const app = express();
 app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
-    credentials: true,
-  })
+  // cors({
+  //   origin: process.env.FRONTEND_URL,
+  //   methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+  //   credentials: true,
+  // })
+  cors()
 );
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -32,6 +34,7 @@ mongoose
 app.use("/", authRoute);
 app.use("/", transactionRoute);
 app.use("/", fundRoute);
+app.use("/api/payment", paymentRoute);
 
 // Route that will be used for self-ping
 app.get("/api/keep-alive", (req, res) => {

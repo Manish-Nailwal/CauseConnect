@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { useParams, Link } from "react-router-dom";
+import { nanoid } from "nanoid";
 import { FaHeart, FaWhatsapp, FaFacebookF } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import {
@@ -23,14 +24,15 @@ import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import PaymentModal from "../components/PaymentModal";
 import { FundContext } from "../context/FundContext";
-
-
+import PaymentMethodModal from "../components/PaymentMethodModal";
+import RazorpayModal from "../components/RazorPayModal";
 
 const FundDetail = () => {
   const { id } = useParams();
-  const {funds} = useContext(FundContext);
+  const { funds } = useContext(FundContext);
   const [fund, setFund] = useState();
   const { user, verifyUser } = useContext(AuthContext);
+  const [showMethodModal, setShowMethodModal] = useState(false);
   useEffect(() => {
     setFund(funds.find((f) => f._id === id));
   }, [funds]);
@@ -43,12 +45,15 @@ const FundDetail = () => {
   const [userFav, setUserFav] = useState(false);
   const [preview, setPreview] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showRazorpay, setShowRazorpay] = useState(false);
+  
+  const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
   // Add to favorite
   const addFavorite = async () => {
     if (user == null) {
       toast.info(
-        "You must be logged in before adding this camping to your favorites."
+        "You must be logged in before adding this camping to your favorites.",
       );
     } else {
       await axios
@@ -97,42 +102,51 @@ const FundDetail = () => {
   const progressPercentage = (fund.currentAmount / fund.targetAmount) * 100;
   const daysLeft = Math.ceil(
     (new Date(fund.endDate).getTime() - new Date().getTime()) /
-      (1000 * 3600 * 24)
+      (1000 * 3600 * 24),
   );
 
-  const handleDonate = ()=>{
-  if(user){
-    if(user._id===fund.organizer._id){
-      toast.warn("Self-donations aren't allowed!")
-    }else{
-      setShowPaymentModal(true);
+  const handleDonate = () => {
+    if (user) {
+      if (user._id === fund.organizer._id) {
+        toast.warn("Self-donations aren't allowed!");
+      } else {
+        setShowMethodModal(true); // 👈 open method selector
+      }
+    } else {
+      toast.info("You must login before proceeding donation!");
     }
-  }else{
-    toast.info("You must login before proceeding donation!");
-  }
-}
-const handleShare = (social) => {
-  const urlToShare = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent("Support this amazing cause!");
-  let url = "";
+  };
+  const handleDevezPay = () => {
+    setShowMethodModal(false);
+    setShowPaymentModal(true); // existing flow
+  };
 
-  switch (social) {
-    case "facebook":
-      url = `https://www.facebook.com/sharer/sharer.php?u=${urlToShare}&quote=${text}`;
-      break;
-    case "twitter":
-      url = `https://twitter.com/intent/tweet?url=${urlToShare}&text=${text}`;
-      break;
-    case "whatsapp":
-      url = `https://wa.me/?text=${text}%20${urlToShare}`;
-      break;
-    default:
-      console.warn("Unsupported social platform:", social);
-      return;
-  }
-  window.open(url, "_blank", "noopener,noreferrer,width=600,height=400");
-};
+  const handleRazorPay = async () => {
+    setShowMethodModal(false);
+    setShowRazorpay(true); // existing flow
+  };
 
+  const handleShare = (social) => {
+    const urlToShare = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent("Support this amazing cause!");
+    let url = "";
+
+    switch (social) {
+      case "facebook":
+        url = `https://www.facebook.com/sharer/sharer.php?u=${urlToShare}&quote=${text}`;
+        break;
+      case "twitter":
+        url = `https://twitter.com/intent/tweet?url=${urlToShare}&text=${text}`;
+        break;
+      case "whatsapp":
+        url = `https://wa.me/?text=${text}%20${urlToShare}`;
+        break;
+      default:
+        console.warn("Unsupported social platform:", social);
+        return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer,width=600,height=400");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-linear-to-br dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 transition-colors ">
@@ -229,7 +243,9 @@ const handleShare = (social) => {
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-emerald-400" />
-                    {(daysLeft > 0 && fund.status) ? `${daysLeft} days left` : "Campaign ended"}
+                    {daysLeft > 0 && fund.status
+                      ? `${daysLeft} days left`
+                      : "Campaign ended"}
                   </div>
                 </div>
 
@@ -329,7 +345,7 @@ const handleShare = (social) => {
 
                 <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white ">
-                    {(daysLeft > 0 && fund.status) ? daysLeft : 0}
+                    {daysLeft > 0 && fund.status ? daysLeft : 0}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-dark-400">
                     days left
@@ -340,7 +356,10 @@ const handleShare = (social) => {
               <div className="space-y-3">
                 {fund.status ? (
                   <>
-                    <button onClick={handleDonate} className="w-full bg-linear-to-r from-emerald-600 to-green-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                    <button
+                      onClick={handleDonate}
+                      className="w-full bg-linear-to-r from-emerald-600 to-green-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
                       Donate Now
                     </button>
                     {!userFav ? (
@@ -373,13 +392,28 @@ const handleShare = (social) => {
                   Share this campaign
                 </h3>
                 <div className="flex justify-center space-x-3">
-                  <button onClick={()=>{handleShare("facebook")}} className="p-3 bg-blue-100 dark:bg-blue-900/30  text-blue-600 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
+                  <button
+                    onClick={() => {
+                      handleShare("facebook");
+                    }}
+                    className="p-3 bg-blue-100 dark:bg-blue-900/30  text-blue-600 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                  >
                     <FaFacebookF className="h-4 w-4" />
                   </button>
-                  <button onClick={()=>{handleShare("whatsapp")}} className="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
+                  <button
+                    onClick={() => {
+                      handleShare("whatsapp");
+                    }}
+                    className="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                  >
                     <FaWhatsapp className="h-4 w-4" />
                   </button>
-                  <button onClick={()=>{handleShare("twitter")}} className="p-3 bg-gray-200 dark:bg-gray-900/30 text-black dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-gray-900/70 transition-colors">
+                  <button
+                    onClick={() => {
+                      handleShare("twitter");
+                    }}
+                    className="p-3 bg-gray-200 dark:bg-gray-900/30 text-black dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-gray-900/70 transition-colors"
+                  >
                     <FaXTwitter className="h-4 w-4" />
                   </button>
                 </div>
@@ -393,6 +427,19 @@ const handleShare = (social) => {
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         fund={fund}
+      />
+      <PaymentMethodModal
+        isOpen={showMethodModal}
+        onClose={() => setShowMethodModal(false)}
+        onDevezPay={handleDevezPay}
+        onRazorPay={handleRazorPay}
+      />
+      <RazorpayModal
+        isOpen={showRazorpay}
+        onClose={() => setShowRazorpay(false)}
+        fund={fund}
+        backendDomain={backendDomain}
+        razorpayKey={keyId}
       />
     </div>
   );
